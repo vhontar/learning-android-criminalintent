@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">criminalintent</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="crime_title_hint">Enter a title for the crime.</string>
 </resources>
