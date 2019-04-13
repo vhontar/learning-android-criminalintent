@@ -1,5 +1,6 @@
 package com.vhontar.criminalintent;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.vhontar.criminalintent.model.Crime;
 import com.vhontar.criminalintent.model.CrimeLab;
@@ -21,8 +21,8 @@ import java.util.List;
 public class CrimeListFragment extends Fragment {
 
     private RecyclerView mRvCrimeList;
-
     private CrimeAdapter mCrimeAdapter;
+    private CrimeLab mCrimeLab;
 
     @Nullable
     @Override
@@ -38,23 +38,35 @@ public class CrimeListFragment extends Fragment {
         return view;
     }
 
-    private void updateUI() {
-        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
-        List<Crime> crimes = crimeLab.getCrimes();
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
 
-        mCrimeAdapter = new CrimeAdapter(crimes);
-        mRvCrimeList.setAdapter(mCrimeAdapter);
+    private void updateUI() {
+        mCrimeLab = CrimeLab.getInstance(getActivity());
+        List<Crime> crimes = mCrimeLab.getCrimes();
+
+        if (mCrimeAdapter == null) {
+            mCrimeAdapter = new CrimeAdapter(crimes);
+            mRvCrimeList.setAdapter(mCrimeAdapter);
+        } else {
+            mCrimeAdapter.notifyDataSetChanged();
+//            mCrimeAdapter.notifyItemChanged(mCrimeLab.getCrimeToUpdate());
+        }
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private Crime mCrime;
+        private int mCrimePosition;
 
         private TextView mTvCrimeTitle;
         private TextView mTvCrimeDate;
         private CheckBox mCbCrimeSolved;
 
-        public CrimeHolder(@NonNull View itemView) {
+        private CrimeHolder(@NonNull View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
             mTvCrimeTitle = itemView.findViewById(R.id.tv_list_item_crime_title);
@@ -62,8 +74,9 @@ public class CrimeListFragment extends Fragment {
             mCbCrimeSolved = itemView.findViewById(R.id.cb_list_item_crime_solved);
         }
 
-        public void bindCrime(Crime crime) {
+        private void bindCrime(Crime crime, int position) {
             mCrime = crime;
+            mCrimePosition = position;
             mTvCrimeTitle.setText(crime.getTitle());
             mTvCrimeDate.setText(crime.getDate().toString());
             mCbCrimeSolved.setChecked(crime.isSolved());
@@ -71,7 +84,9 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(getActivity(), mCrime.getTitle() + " clicked!", Toast.LENGTH_LONG).show();
+            mCrimeLab.setCrimeToUpdate(mCrimePosition);
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
+            startActivity(intent);
         }
     }
 
@@ -79,7 +94,7 @@ public class CrimeListFragment extends Fragment {
 
         private List<Crime> mCrimes;
 
-        public CrimeAdapter(List<Crime> crimes) {
+        private CrimeAdapter(List<Crime> crimes) {
             mCrimes = crimes;
         }
 
@@ -94,7 +109,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
             Crime crime = mCrimes.get(i);
-            ((CrimeHolder) viewHolder).bindCrime(crime);
+            ((CrimeHolder) viewHolder).bindCrime(crime, i);
         }
 
         @Override

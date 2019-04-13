@@ -10,6 +10,7 @@ public class CrimeLab {
     private static CrimeLab sCrimeLab;
 
     private List<Crime> mCrimes;
+    private int mCrimeToUpdate;
 
     public static CrimeLab getInstance(Context context) {
         if (sCrimeLab == null) {
@@ -41,4 +42,14 @@ public class CrimeLab {
         }
         return null;
     }
+
+
+    public int getCrimeToUpdate() {
+        return mCrimeToUpdate;
+    }
+
+    public void setCrimeToUpdate(int crimeToUpdate) {
+        mCrimeToUpdate = crimeToUpdate;
+    }
+
 }
