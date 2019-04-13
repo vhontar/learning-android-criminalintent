@@ -21,13 +21,10 @@ public class CrimeLab {
 
     private CrimeLab(Context context) {
         mCrimes = new ArrayList<>();
-        // Temporary
-        for (int i = 0; i < 100; i++) {
-            Crime crime = new Crime();
-            crime.setTitle("Crime #" + i);
-            crime.setSolved(i % 2 == 0); // Every other one
-            mCrimes.add(crime);
-        }
+    }
+
+    public void addCrime(Crime c) {
+        mCrimes.add(c);
     }
 
     public List<Crime> getCrimes() {
@@ -43,6 +40,13 @@ public class CrimeLab {
         return null;
     }
 
+    public void removeCrime(UUID uuid) {
+        removeCrime(getCrime(uuid));
+    }
+
+    public void removeCrime(Crime crime) {
+        mCrimes.remove(crime);
+    }
 
     public int getCrimeToUpdate() {
         return mCrimeToUpdate;

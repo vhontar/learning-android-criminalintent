@@ -1,7 +1,6 @@
 package com.vhontar.criminalintent;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,11 +10,13 @@ import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import com.vhontar.criminalintent.model.Crime;
@@ -57,6 +58,25 @@ public class CrimeFragment extends Fragment {
         mCrime = CrimeLab.getInstance(getActivity()).getCrime(mCrimeId);
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.fragment_crime_delete: {
+                CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
+                crimeLab.removeCrime(mCrime.getId());
+                getActivity().finish();
+                return true;
+            }
+            default: return super.onOptionsItemSelected(item);
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -83,11 +103,11 @@ public class CrimeFragment extends Fragment {
 
         mDateButton = v.findViewById(R.id.crime_date);
         updateDate();
-        mDateButton.setOnClickListener(v12 -> openDateDialog(false));
+        mDateButton.setOnClickListener(v12 -> openDateDialog(true));
 
         mTimeButton = v.findViewById(R.id.crime_time);
         updateTime();
-        mTimeButton.setOnClickListener(v1 -> openTimeDialog(false));
+        mTimeButton.setOnClickListener(v1 -> openTimeDialog(true));
 
         mSolvedCheckBox = v.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setChecked(mCrime.isSolved());

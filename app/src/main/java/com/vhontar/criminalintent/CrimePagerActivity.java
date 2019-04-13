@@ -3,11 +3,11 @@ package com.vhontar.criminalintent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 
 import com.vhontar.criminalintent.model.Crime;
 import com.vhontar.criminalintent.model.CrimeLab;
@@ -15,7 +15,7 @@ import com.vhontar.criminalintent.model.CrimeLab;
 import java.util.List;
 import java.util.UUID;
 
-public class CrimePagerActivity extends FragmentActivity {
+public class CrimePagerActivity extends AppCompatActivity {
 
     private static final String EXTRA_CRIME_ID = "crime_pager_crime_id";
 
