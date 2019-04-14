@@ -1,4 +1,4 @@
-package com.vhontar.criminalintent.models;
+package com.vhontar.criminalintent.models.crime;
 
 import android.content.ContentValues;
 import android.content.Context;

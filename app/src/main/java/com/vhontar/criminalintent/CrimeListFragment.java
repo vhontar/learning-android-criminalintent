@@ -18,8 +18,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.vhontar.criminalintent.models.Crime;
-import com.vhontar.criminalintent.models.CrimeLab;
+import com.vhontar.criminalintent.models.crime.Crime;
+import com.vhontar.criminalintent.models.crime.CrimeLab;
 
 import java.util.List;
 

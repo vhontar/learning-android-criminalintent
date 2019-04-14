@@ -1,4 +1,4 @@
-package com.vhontar.criminalintent.models;
+package com.vhontar.criminalintent.models.crime;
 
 public class CrimeDbSchema {
     public static final class CrimeTable {

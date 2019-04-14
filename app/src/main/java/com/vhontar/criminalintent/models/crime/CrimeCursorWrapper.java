@@ -1,9 +1,9 @@
-package com.vhontar.criminalintent.models;
+package com.vhontar.criminalintent.models.crime;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.vhontar.criminalintent.models.CrimeDbSchema.CrimeTable;
+import com.vhontar.criminalintent.models.crime.CrimeDbSchema.CrimeTable;
 
 import java.util.Date;
 import java.util.UUID;
