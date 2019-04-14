@@ -18,8 +18,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.vhontar.criminalintent.model.Crime;
-import com.vhontar.criminalintent.model.CrimeLab;
+import com.vhontar.criminalintent.models.Crime;
+import com.vhontar.criminalintent.models.CrimeLab;
 
 import java.util.List;
 
@@ -137,6 +137,7 @@ public class CrimeListFragment extends Fragment {
             mCrimeAdapter = new CrimeAdapter(crimes);
             mRvCrimeList.setAdapter(mCrimeAdapter);
         } else {
+            mCrimeAdapter.setCrimes(crimes);
             mCrimeAdapter.notifyDataSetChanged();
 //            mCrimeAdapter.notifyItemChanged(mCrimeLab.getCrimeToUpdate());
         }
@@ -182,6 +183,10 @@ public class CrimeListFragment extends Fragment {
         private List<Crime> mCrimes;
 
         private CrimeAdapter(List<Crime> crimes) {
+            mCrimes = crimes;
+        }
+
+        public void setCrimes(List<Crime> crimes) {
             mCrimes = crimes;
         }
 

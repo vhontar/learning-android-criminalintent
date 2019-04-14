@@ -1,4 +1,4 @@
-package com.vhontar.criminalintent.model;
+package com.vhontar.criminalintent.models;
 
 import java.util.Date;
 import java.util.UUID;
@@ -12,7 +12,11 @@ public class Crime {
     private boolean mIsSolved;
 
     public Crime() {
-        mId = UUID.randomUUID();
+        this(UUID.randomUUID());
+    }
+
+    public Crime(UUID id) {
+        mId = id;
         mDate = new Date();
     }
 

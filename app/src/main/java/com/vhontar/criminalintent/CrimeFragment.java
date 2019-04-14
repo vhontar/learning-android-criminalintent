@@ -19,8 +19,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-import com.vhontar.criminalintent.model.Crime;
-import com.vhontar.criminalintent.model.CrimeLab;
+import com.vhontar.criminalintent.models.Crime;
+import com.vhontar.criminalintent.models.CrimeLab;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -56,6 +56,14 @@ public class CrimeFragment extends Fragment {
 
         UUID mCrimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.getInstance(getActivity()).getCrime(mCrimeId);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        CrimeLab.getInstance(getActivity())
+                .updateCrime(mCrime);
     }
 
     @Override

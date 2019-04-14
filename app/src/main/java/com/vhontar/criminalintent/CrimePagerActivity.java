@@ -9,8 +9,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
-import com.vhontar.criminalintent.model.Crime;
-import com.vhontar.criminalintent.model.CrimeLab;
+import com.vhontar.criminalintent.models.Crime;
+import com.vhontar.criminalintent.models.CrimeLab;
 
 import java.util.List;
 import java.util.UUID;
