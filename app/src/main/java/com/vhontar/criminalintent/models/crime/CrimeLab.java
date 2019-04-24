@@ -4,9 +4,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 
 import com.vhontar.criminalintent.helpers.CrimeBaseHelper;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -112,6 +114,16 @@ public class CrimeLab {
 
     public void setCrimeToUpdate(int crimeToUpdate) {
         mCrimeToUpdate = crimeToUpdate;
+    }
+
+    public File getPhotoFile(Crime c) {
+        File externalFilesDir = Environment.getExternalStorageDirectory();
+
+        if (externalFilesDir == null) {
+            return null;
+        }
+
+        return new File(externalFilesDir, c.getCrimePhotoFilename());
     }
 
 }

@@ -5,7 +5,6 @@ import java.util.UUID;
 
 public class Crime {
 
-
     private UUID mId;
     private String mTitle;
     private Date mDate;
@@ -69,5 +68,9 @@ public class Crime {
 
     public void setNumber(String number) {
         mNumber = number;
+    }
+
+    public String getCrimePhotoFilename() {
+        return "IMG_" + getId().toString() + ".jpg";
     }
 }
