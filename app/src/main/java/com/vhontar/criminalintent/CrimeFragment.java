@@ -1,21 +1,25 @@
 package com.vhontar.criminalintent;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -24,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -45,23 +50,27 @@ public class CrimeFragment extends Fragment {
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String DATE_DIALOG = "date_dialog";
     private static final String TIME_DIALOG = "time_dialog";
+    private static final String ZOOMED_CRIME_PHOTO_DIALOG = "zoomed_crime_photo_dialog";
     private static final int REQUEST_DATE_PICKER = 0;
     private static final int REQUEST_TIME_DIALOG = 1;
     private static final int REQUEST_CONTACT = 2;
     private static final int REQUEST_PHOTO = 3;
+    private static final int REQUEST_CAMERA_PERMISSION = 4;
 
     private EditText mTitleEditText;
     private Button mDateButton;
     private Button mTimeButton;
     private CheckBox mSolvedCheckBox;
     private Button mCrimeSuspectButton;
-    private Button mSendCrimeResportButton;
+    private Button mSendCrimeReportButton;
     private Button mCallSuspectButton;
     private ImageView mIvCrimePhoto;
     private ImageButton mIbCrimeCamera;
 
     private File mPhotoFile;
     private Crime mCrime;
+    private Intent mCaptureImage;
+    private Point mPhotoViewSize;
 
     public static Fragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
@@ -161,8 +170,8 @@ public class CrimeFragment extends Fragment {
             mCrimeSuspectButton.setEnabled(false);
         }
 
-        mSendCrimeResportButton = v.findViewById(R.id.crime_report);
-        mSendCrimeResportButton.setOnClickListener(v14 ->
+        mSendCrimeReportButton = v.findViewById(R.id.crime_report);
+        mSendCrimeReportButton.setOnClickListener(v14 ->
                 ShareCompat.IntentBuilder.from(getActivity())
                     .setSubject(getString(R.string.crime_report_subject))
                     .setText(getCrimeReport())
@@ -184,17 +193,27 @@ public class CrimeFragment extends Fragment {
         }
 
         mIbCrimeCamera = v.findViewById(R.id.ib_crime_camera);
-        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        boolean canTakePhoto = mPhotoFile != null && captureImage.resolveActivity(packageManager) != null;
+        mCaptureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        boolean canTakePhoto = mPhotoFile != null && mCaptureImage.resolveActivity(packageManager) != null;
         mIbCrimeCamera.setEnabled(canTakePhoto);
         if (canTakePhoto) {
             Uri uri = Uri.fromFile(mPhotoFile);
-            captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+            mCaptureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         }
-        mIbCrimeCamera.setOnClickListener(v1 -> startActivityForResult(captureImage, REQUEST_PHOTO));
+        mIbCrimeCamera.setOnClickListener(v1 -> checkPermissionAndOpenCamera());
 
         mIvCrimePhoto = v.findViewById(R.id.iv_crime_photo);
-        updateCrimePhotoView();
+        mIvCrimePhoto.setOnClickListener(v2 -> openZoomedCrimePhoto());
+
+        final ViewTreeObserver observer = mIvCrimePhoto.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(() -> {
+            boolean isFirstPass = (mPhotoViewSize == null);
+            mPhotoViewSize = new Point();
+            mPhotoViewSize.set(mIvCrimePhoto.getWidth(), mIvCrimePhoto.getHeight());
+
+            if (isFirstPass)
+                updateCrimePhotoView();
+        });
 
         return v;
     }
@@ -269,6 +288,18 @@ public class CrimeFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openCamera();
+            }
+        }
+    }
+
     private void openDateDialog(boolean isDialogOpen) {
 
         if (isDialogOpen) {
@@ -327,9 +358,38 @@ public class CrimeFragment extends Fragment {
     private void updateCrimePhotoView() {
         if (mPhotoFile == null || !mPhotoFile.exists()) {
             mIvCrimePhoto.setImageDrawable(null);
+            return;
+        }
+        Bitmap bitmap;
+        if (mPhotoViewSize == null) {
+            bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
         } else {
-            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
-            mIvCrimePhoto.setImageBitmap(bitmap);
+            bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), mPhotoViewSize.x, mPhotoViewSize.y);
+        }
+        mIvCrimePhoto.setImageBitmap(bitmap);
+    }
+
+    private void checkPermissionAndOpenCamera() {
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        } else if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION);
+        } else {
+            openCamera();
+        }
+    }
+
+    private void openCamera() {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        startActivityForResult(mCaptureImage, REQUEST_PHOTO);
+    }
+
+    private void openZoomedCrimePhoto() {
+        if (mPhotoFile != null && mPhotoFile.exists()) {
+            FragmentManager fm = getFragmentManager();
+            CrimePhotoDialogFragment cpdf = CrimePhotoDialogFragment.newInstance(mPhotoFile.getPath());
+            cpdf.show(fm, ZOOMED_CRIME_PHOTO_DIALOG);
         }
     }
 }

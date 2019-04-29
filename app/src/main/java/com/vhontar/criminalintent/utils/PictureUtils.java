@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.util.Log;
+
+import java.io.File;
 
 public class PictureUtils {
 
     public static Bitmap getScaledBitmap(String path, int destWidth, int destHeight) {
+
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, options);
