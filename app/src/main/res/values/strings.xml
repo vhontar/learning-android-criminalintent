@@ -12,8 +12,8 @@
     <string name="show_subtitle">Show Subtitle</string>
     <string name="hide_subtitle">Hide Subtitle</string>
     <plurals name="subtitle_plural">
-        <item quantity="one">%1$s crime</item>
-        <item quantity="other">%1$s crimes</item>
+        <item quantity="one">%1$d crime</item>
+        <item quantity="other">%1$d crimes</item>
     </plurals>
 
     <string name="delete_crime">Delete Crime</string>
