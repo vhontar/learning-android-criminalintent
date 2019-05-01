@@ -3,6 +3,7 @@ package com.vhontar.criminalintent;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -71,6 +72,7 @@ public class CrimeFragment extends Fragment {
     private Crime mCrime;
     private Intent mCaptureImage;
     private Point mPhotoViewSize;
+    private Callbacks mCallbacks;
 
     public static Fragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
@@ -96,6 +98,18 @@ public class CrimeFragment extends Fragment {
 
         CrimeLab.getInstance(getActivity())
                 .updateCrime(mCrime);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
     @Override
@@ -133,6 +147,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mCrime.setTitle(s.toString());
+                updateCrime();
             }
 
             @Override
@@ -151,7 +166,10 @@ public class CrimeFragment extends Fragment {
 
         mSolvedCheckBox = v.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setChecked(mCrime.isSolved());
-        mSolvedCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> mCrime.setSolved(isChecked));
+        mSolvedCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mCrime.setSolved(isChecked);
+            updateCrime();
+        });
 
         final Intent pickContact = new Intent(Intent.ACTION_PICK,
                 ContactsContract.Contacts.CONTENT_URI);
@@ -229,6 +247,7 @@ public class CrimeFragment extends Fragment {
             mCrime.setDate(date);
             updateDate();
             updateTime();
+            updateCrime();
         }
 
         if (requestCode == REQUEST_TIME_DIALOG) {
@@ -236,10 +255,12 @@ public class CrimeFragment extends Fragment {
             mCrime.setDate(date);
             updateTime();
             updateDate();
+            updateCrime();
         }
 
         if (requestCode == REQUEST_PHOTO) {
             updateCrimePhotoView();
+            updateCrime();
         }
 
         if (requestCode == REQUEST_CONTACT && data != null) {
@@ -263,6 +284,7 @@ public class CrimeFragment extends Fragment {
 
                 String suspect = cursorContact.getString(1);
                 mCrime.setSuspect(suspect);
+                updateCrime();
                 mCrimeSuspectButton.setText(suspect);
 
                 cursorContactNumber = contentResolver.query(
@@ -298,6 +320,11 @@ public class CrimeFragment extends Fragment {
                 openCamera();
             }
         }
+    }
+
+    private void updateCrime() {
+        CrimeLab.getInstance(getActivity()).updateCrime(mCrime);
+        mCallbacks.onCrimeUpdated(mCrime);
     }
 
     private void openDateDialog(boolean isDialogOpen) {
@@ -391,5 +418,9 @@ public class CrimeFragment extends Fragment {
             CrimePhotoDialogFragment cpdf = CrimePhotoDialogFragment.newInstance(mPhotoFile.getPath());
             cpdf.show(fm, ZOOMED_CRIME_PHOTO_DIALOG);
         }
+    }
+
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
     }
 }

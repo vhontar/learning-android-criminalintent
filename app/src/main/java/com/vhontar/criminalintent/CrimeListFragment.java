@@ -1,5 +1,6 @@
 package com.vhontar.criminalintent;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,6 +34,7 @@ public class CrimeListFragment extends Fragment {
     private CrimeAdapter mCrimeAdapter;
     private CrimeLab mCrimeLab;
     private boolean mSubtitleVisible;
+    private Callbacks mCallbacks;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,6 +81,18 @@ public class CrimeListFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_crime_list, menu);
@@ -109,8 +123,7 @@ public class CrimeListFragment extends Fragment {
     private void createCrimeAndOpenEditor() {
         Crime crime = new Crime();
         mCrimeLab.addCrime(crime);
-        Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
-        startActivity(intent);
+        mCallbacks.onCrimeSelected(crime);
     }
 
     private void updateSubtitle() {
@@ -124,7 +137,7 @@ public class CrimeListFragment extends Fragment {
         appCompatActivity.getSupportActionBar().setSubtitle(subtitle);
     }
 
-    private void updateUI() {
+    public void updateUI() {
         mCrimeLab = CrimeLab.getInstance(getActivity());
         List<Crime> crimes = mCrimeLab.getCrimes();
 
@@ -173,8 +186,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onClick(View v) {
             mCrimeLab.setCrimeToUpdate(mCrimePosition);
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
-            startActivity(intent);
+            mCallbacks.onCrimeSelected(mCrime);
         }
     }
 
@@ -208,5 +220,9 @@ public class CrimeListFragment extends Fragment {
         public int getItemCount() {
             return mCrimes.size();
         }
+    }
+
+    public interface Callbacks {
+        void onCrimeSelected(Crime crime);
     }
 }

@@ -15,7 +15,7 @@ import com.vhontar.criminalintent.models.crime.CrimeLab;
 import java.util.List;
 import java.util.UUID;
 
-public class CrimePagerActivity extends AppCompatActivity {
+public class CrimePagerActivity extends AppCompatActivity implements CrimeFragment.Callbacks{
 
     private static final String EXTRA_CRIME_ID = "crime_pager_crime_id";
 
@@ -57,5 +57,10 @@ public class CrimePagerActivity extends AppCompatActivity {
                 mVpCrimePager.setCurrentItem(i);
             }
         }
+    }
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+
     }
 }
