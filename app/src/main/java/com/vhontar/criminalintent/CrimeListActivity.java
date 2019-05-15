@@ -35,6 +35,8 @@ public class CrimeListActivity extends SingleFragmentActivity implements
     public void onCrimeUpdated(Crime crime) {
         CrimeListFragment crimeListFragment = (CrimeListFragment)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-        crimeListFragment.updateUI();
+        if (crimeListFragment != null) {
+            crimeListFragment.updateUI();
+        }
     }
 }
